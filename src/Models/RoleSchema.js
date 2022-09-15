@@ -1,27 +1,27 @@
 const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 
-const roleSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    require: true,
+const currentDate = moment.utc(moment.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss')).toDate();
+
+const roleSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      require: true,
+    },
+    description: {
+      type: String,
+      require: true,
+    },
+    active: {
+      type: Boolean,
+      require: false,
+      default: true,
+    },
   },
-  description: {
-    type: String,
-    require: true,
-  },
-  active: {
-    type: Boolean,
-    require: true,
-    default: true,
-  },
-  createdAt: {
-    type: Date,
-    require: true,
-  },
-  updatedAt: {
-    type: Date,
-    require: true,
-  },
-});
+  {
+    timestamps: { currentTime: () => currentDate }
+  }
+);
 
 module.exports = mongoose.model('Role', roleSchema);

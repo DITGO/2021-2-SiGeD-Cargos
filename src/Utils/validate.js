@@ -13,6 +13,4 @@ const validateRole = ({ name, description }) => {
   return errors;
 };
 
-module.exports = {
-  validateRole,
-};
+module.exports = { validateRole };

@@ -4,76 +4,93 @@ const Role = require('../Models/RoleSchema');
 
 
 const apiRoles = {
-  async putRole (req, res) {
+  async create (req, res) {
     const { name, description } = req.body;
-    const validFields = validation.validateRole({ name, description });
-    if (validFields.length) {
-      return res.status(400).json({ status: validFields });
+    const invalidFields = validation.validateRole({ name, description });
+
+    if (invalidFields.length) {
+      return res.status(400).json({ status: invalidFields });
     }
-    const newRole = await Role.create({
-      name,
-      description,
-      active: true,
-      createdAt: moment.utc(moment.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss')).toDate(),
-      updatedAt: moment.utc(moment.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss')).toDate(),
-    });
-    return res.json(newRole);
+
+    try {
+      const newRole = await Role.create({ name, description });
+      return res.json(newRole);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
   },
 
-  async getAll(req, res) {
-    const role = await Role.find({ active: true });
-    return res.status(200).json(role);
+  async getAllActive(_req, res) {
+    try {
+      const role = await Role.find({ active: true });
+      return res.status(200).json(role);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
   },
 
-  async getRole(req, res) {
-    const { id } = req.params;
-    const role = await Role.findOne({ _id: id });
-    return res.status(200).json(role);
-  },
-
-  async queryRole(req, res) {
-    const { _id, name, description, createdAt, updatedAt, } = req.body;
-    const requestObj = { _id, name, description, active: true, createdAt, updatedAt };
-
-    /* Remove key:undefined */
-    Object.keys(requestObj).forEach((key) => (requestObj[key] === undefined ? delete requestObj[key] : {}));
-
-    const roles = await Role.find(requestObj);
-    return res.status(200).json(roles);
-  },
-
-  async deleteRole(req, res) {
-    const { id } = req.params;
-    await Role.deleteOne({ _id: id });
-    return res.status(200).json({ message: 'success' });
-  },
-
-  async patchRole(req, res) {
-    const { id } = req.params;
-    const { name, description } = req.body;
-    const requestObj = { name, description };
-
-    /* Remove key:undefined */
-    Object.keys(requestObj).forEach((key) => (requestObj[key] === undefined ? delete requestObj[key] : {}));
-
-    const updateStatus = await Role.findOneAndUpdate({ _id: id }, {
-      ...requestObj,
-      updatedAt: moment.utc(moment.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss')).toDate(),
-    });
-    return res.status(200).json(updateStatus);
-  },
-
-  async deactivateRole(req, res) {
+  async getById(req, res) {
     const { id } = req.params;
 
     try {
-      const updateResponse = await Role.findOneAndUpdate({ _id: id }, {
-        active: false,
-        updatedAt: moment.utc(moment.tz('America/Sao_Paulo').format('YYYY-MM-DDTHH:mm:ss')).toDate(),
-      }, { new: true }, (feature) => feature);
+      const role = await Role.findOne({ _id: id });
+      return res.status(200).json(role);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  },
+
+  async queryActive(req, res) {
+    const requestObj = req.body;
+
+     try {
+      const roles = await Role.find({...requestObj, active: true});
+      return res.status(200).json(roles);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  },
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    try {
+      const deleteResponse = await Role.findOneAndUpdate(
+        { _id: id },
+        { active: false },
+        { new: true },
+        (feature) => feature);
+      console.log(deleteResponse);
+      return res.status(200).json({ message: 'succ.messageess' });
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  },
+
+  async patch(req, res) {
+    const { id } = req.params;
+    const requestObj = req.body;
+
+    try {
+      const updateStatus = await Role.findOneAndUpdate({ _id: id }, requestObj);
+      return res.status(200).json(updateStatus);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  },
+
+  async deactivate(req, res) {
+    const { id } = req.params;
+
+    try {
+      const updateResponse = await Role.findOneAndUpdate(
+        { _id: id },
+        { active: false },
+        { new: true },
+        (feature) => feature);
       return res.status(200).json(updateResponse);
     } catch (error) {
-      return res.status(400).json({ message: 'Invalid Id' });
+      return res.status(400).json({ message: error.message });
     }
   }
 };
