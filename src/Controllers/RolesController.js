@@ -13,12 +13,8 @@ const putRole = async (req, res) => {
     name,
     description,
     active: true,
-    createdAt: moment
-      .utc(moment.tz("America/Sao_Paulo").format("YYYY-MM-DDTHH:mm:ss"))
-      .toDate(),
-    updatedAt: moment
-      .utc(moment.tz("America/Sao_Paulo").format("YYYY-MM-DDTHH:mm:ss"))
-      .toDate(),
+    createdAt: now,
+    updatedAt: now,
   });
   return res.json(newRole);
 };
@@ -77,9 +73,7 @@ const deleteRole = async (req, res) => {
     const updated = await Role.findOneAndUpdate(
       { _id: id, active: true },
       {
-        updatedAt: moment
-          .utc(moment.tz("America/Sao_Paulo").format("YYYY-MM-DDTHH:mm:ss"))
-          .toDate(),
+        updatedAt: now,
         active: false,
       }
     );
@@ -103,13 +97,15 @@ const patchRole = async (req, res) => {
     { _id: id },
     {
       ...requestObj,
-      updatedAt: moment
-        .utc(moment.tz("America/Sao_Paulo").format("YYYY-MM-DDTHH:mm:ss"))
-        .toDate(),
+      updatedAt: now,
     }
   );
   return res.status(200).json(updateStatus);
 };
+
+const now = moment
+  .utc(moment.tz("America/Sao_Paulo").format("YYYY-MM-DDTHH:mm:ss"))
+  .toDate();
 
 module.exports = {
   putRole,
