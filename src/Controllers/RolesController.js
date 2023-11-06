@@ -52,34 +52,16 @@ const queryRole = async (req, res) => {
   return res.status(200).json(roles);
 };
 
+
 const deleteRole = async (req, res) => {
-  // Get request data
   const { id } = req.params;
-  const token = req.headers["x-access-token"];
-  // Find role name
-  const role = await Role.findOne({
-    _id: id
-  })
 
-  // Check if exist user with role
-  const clients = await clientsService.getUsersWithRole(role.name, token)
+  try {
+    await Role.deleteOne({ _id: id });
 
-  if (Array.isArray(clients) && clients.length) {
-    return res.status(409).json({
-      message: `Role ${role.name} is being used`
-    })
-
-  } else {
-    const updated = await Role.findOneAndUpdate(
-      { _id: id, active: true },
-      {
-        updatedAt: now,
-        active: false,
-      }
-    );
-
-    console.log(updated);
-    return res.status(200).json({ message: "success" });
+    return res.json({ message: 'success' });
+  } catch (error) {
+    return res.status(400).json({ message: 'failure' });
   }
 };
 
